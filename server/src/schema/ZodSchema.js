@@ -26,9 +26,8 @@ export const createMarketSchema = z.object({
 })
 
 export const createPutSchema = z.object({
-    user: objectIdSchema,
     market: objectIdSchema,
-    predicton: z.string().transform((s) => s.toLowerCase).pipe((z.enum(['yes', 'no'], {
+    prediction: z.string().transform((s) => s.toLowerCase).pipe((z.enum(['yes', 'no'], {
         message: "just yes or no"
     }))),
     amountSpent: z.number().positive("wager amount > 0")
