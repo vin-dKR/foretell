@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt"
 import { User } from "../models/Models.js"
 import { createUserSchema, signinSchema } from "../schema/ZodSchema.js"
+
 export const signup = async (req, res) => {
     try {
         const { name, email, password } = createUserSchema.safeParse(req.body)
