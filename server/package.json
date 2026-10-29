@@ -3,8 +3,8 @@
   "module": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
-    "test": "node --test src/__tests__/*.test.js",
+    "start": "bun src/index.js",
+    "test": "bun test src/__tests__",
     "build": "bun build --target=bun --outdir dist src/index.js"
   },
   "devDependencies": {
@@ -14,7 +14,7 @@
     "bcrypt": "^6.0.0",
     "express": "^5.3.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.11.4",
+    "mongoose": "8",
     "zod": "^4.6.7"
   }
 }

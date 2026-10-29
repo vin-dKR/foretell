@@ -163,7 +163,7 @@ test("createMarket stores expiresAt and deducts the seed within its transaction"
         async withTransaction(work) {
             await work();
         },
-        async endSession() {}
+        async endSession() { }
     };
 
     mongoose.startSession = async () => session;
@@ -216,7 +216,7 @@ test("orderPut atomically debits the wager and creates a position", async () => 
         async withTransaction(work) {
             await work();
         },
-        async endSession() {}
+        async endSession() { }
     };
     const marketId = "507f191e810c19729de860ea";
     const userId = "507f1f77bcf86cd799439011";
@@ -276,14 +276,14 @@ test("resolveMarket pays the entire pool to winning positions", async () => {
         async withTransaction(work) {
             await work();
         },
-        async endSession() {}
+        async endSession() { }
     };
     const market = {
         _id: marketId,
         creator: userId,
         status: "open",
         pool: { yes: 60, no: 40 },
-        async save() {}
+        async save() { }
     };
 
     mongoose.startSession = async () => session;
@@ -320,7 +320,7 @@ test("resolveMarket only allows the creator to resolve a market", async () => {
         async withTransaction(work) {
             await work();
         },
-        async endSession() {}
+        async endSession() { }
     };
 
     mongoose.startSession = async () => session;
@@ -357,14 +357,14 @@ test("canceling a market refunds wagers and the creator's seed", async () => {
         async withTransaction(work) {
             await work();
         },
-        async endSession() {}
+        async endSession() { }
     };
     const market = {
         creator: userId,
         status: "open",
         initialSeedAmount: 50,
         pool: { yes: 60, no: 20 },
-        async save() {}
+        async save() { }
     };
 
     mongoose.startSession = async () => session;
