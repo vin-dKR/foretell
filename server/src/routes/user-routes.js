@@ -1,13 +1,13 @@
 import { Router } from "express";
-import { auth } from "../middleware/middleware";
-import { addBalance } from "../controller/user/add-balance";
-import { orderPut } from "../controller/user/order-put";
+import { auth } from "../middleware/middleware.js";
+import { addBalance } from "../controller/user/add-balance.js";
+import { orderPut } from "../controller/user/order-put.js";
 
 const router = Router()
 
-router.post("/add-balance", auth, addBalance)
+router.post("/add-balance", auth, addBalance);
 
 
-router.post("/put-order", auth, orderPut)
+router.post("/put-order", auth, orderPut);
 
-export default userRouter
+export default router;

@@ -3,17 +3,17 @@ import mongoose from "mongoose";
 const { Schema } = mongoose
 
 const userSchema = new Schema({
-    name: String,
-    email: String,
-    password: String,
-    balance: Number
+    name: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, trim: true, lowercase: true },
+    password: { type: String, required: true },
+    balance: { type: Number, required: true, default: 0, min: 0 }
 })
 
 const User = mongoose.model('User', userSchema)
 
 const marketSchema = new Schema({
     title: { type: String, required: true },
-    desc: String,
+    desc: { type: String, required: true, trim: true },
     pool: {
         yes: { type: Number, default: 0 },
         no: { type: Number, default: 0 }
@@ -36,9 +36,9 @@ const marketSchema = new Schema({
         ref: 'User',
         required: true
     },
-    initialSeedAmount: { type: Number }
+    initialSeedAmount: { type: Number, required: true, min: 0 }
 }, { timestamps: true })
-marketSchema.index({ staus: 1, expiresAt: 1 })
+marketSchema.index({ status: 1, expiresAt: 1 })
 
 const Market = mongoose.model('Market', marketSchema)
 
@@ -61,7 +61,8 @@ const putSchema = new Schema({
     },
     amountSpent: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
     }
 }, { timestamps: true })
 putSchema.index({ user: 1, market: 1 })

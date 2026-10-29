@@ -2,6 +2,11 @@
   "name": ".",
   "module": "src/index.js",
   "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test src/__tests__/*.test.js",
+    "build": "bun build --target=bun --outdir dist src/index.js"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

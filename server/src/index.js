@@ -1,25 +1,24 @@
-import express from "express"
-import userRouter from "./routes/user-routes"
-import authRouter from "./routes/auth";
-import marketRouter from "./routes/market-routes";
+import mongoose from "mongoose";
+import { createApp } from "./app.js";
 
-const app = express()
+const port = Number(process.env.PORT) || 3001;
 
-app.use(express.json())
+async function start() {
+    if (!process.env.MONGO_URI) {
+        console.error("MONGO_URI must be configured before starting the API");
+        process.exitCode = 1;
+        return;
+    }
 
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("Connected"))
-    .catch((err) => console.error("DB connection err", err));
+    try {
+        await mongoose.connect(process.env.MONGO_URI);
+        createApp().listen(port, () => {
+            console.log(`Prediction API listening on port ${port}`);
+        });
+    } catch (error) {
+        console.error("Unable to connect to MongoDB", error);
+        process.exitCode = 1;
+    }
+}
 
-app.get("/", (req, res) => {
-    res.send("hii")
-})
-
-app.use("/api/auth", authRouter)
-app.use("/api/market", marketRouter)
-app.use("/api/user", userRouter)
-
-
-app.listen(3001, () => {
-    console.log("hiii we are good")
-})
+start();

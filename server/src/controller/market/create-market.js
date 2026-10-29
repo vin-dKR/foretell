@@ -1,71 +1,69 @@
-import mongoose from "mongoose"
-import { Market, User } from "../../models/Models"
-import { createMarketSchema } from "../../schema/ZodSchema"
+import mongoose from "mongoose";
+import { Market, User } from "../../models/Models.js";
+import { createMarketSchema } from "../../schema/ZodSchema.js";
+
+function requestError(status, message) {
+    const error = new Error(message);
+    error.status = status;
+    return error;
+}
 
 export async function createMarket(req, res) {
-    const session = mongoose.startSession()
-    session.startTransaction()
+    const validation = createMarketSchema.safeParse(req.body);
+    if (!validation.success) {
+        return res.status(400).json({ error: validation.error.flatten() });
+    }
+
+    if (!req.userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { title, desc, expireAt, initialSeedAmount } = validation.data;
+    let session;
 
     try {
-        const validation = createMarketSchema.safeParse(req.body)
-        if (!validation.success) {
-            await session.abortTransaction()
-            session.endSession()
-            return res.status(400).json({
-                error: validation.error
-            })
-        }
+        session = await mongoose.startSession();
+        let newMarket;
 
-        const { title, desc, expireAt, initialSeedAmount } = validation.data
-        const userId = req.userId
+        await session.withTransaction(async () => {
+            const user = await User.findOneAndUpdate(
+                { _id: req.userId, balance: { $gte: initialSeedAmount } },
+                { $inc: { balance: -initialSeedAmount } },
+                { new: true, session }
+            );
 
-        if (!userId) {
-            await session.abortTransaction()
-            session.endSession()
-            return res.status(404).json({
-                error: "Unauthorized"
-            })
-        }
-
-        const user = await User.findOneAndUpdate(
-            { _id: userId, balance: { $gte: initialSeedAmount } },
-            { $inc: { balance: -initialSeedAmount } },
-            { new: true }
-        )
-
-        if (!user) {
-            await session.abortTransaction()
-            session.endSession()
-            res.status(400).json({ error: "Insufficient balance" })
-        }
-
-        const splitSeed = initialSeedAmount / 2
-        const [newMarket] = await Market.create([{
-            title,
-            desc,
-            expireAt,
-            creator: userId,
-            pool: {
-                yes: splitSeed,
-                no: splitSeed
+            if (!user) {
+                throw requestError(400, "Insufficient balance");
             }
-        }], { session })
 
-        await session.commitTransaction()
-        session.endSession()
+            const seedPerOutcome = initialSeedAmount / 2;
+            [newMarket] = await Market.create([{
+                title,
+                desc,
+                expiresAt: expireAt,
+                creator: req.userId,
+                initialSeedAmount,
+                pool: {
+                    yes: seedPerOutcome,
+                    no: seedPerOutcome
+                }
+            }], { session });
+        });
 
         return res.status(201).json({
-            message: "marget created successfully",
+            message: "Market created successfully",
             market: newMarket
-        })
-    } catch (err) {
-        conosle.log(err)
+        });
+    } catch (error) {
+        if (error.status) {
+            return res.status(error.status).json({ error: error.message });
+        }
 
-        await session.abortTransaction()
-        session.endSession()
-
-        return res.status(500).json({
-            error: "Internal server error"
-        })
+        console.error("Unable to create market", error);
+        return res.status(500).json({ error: "Internal server error" });
+    } finally {
+        if (session) {
+            await session.endSession();
+        }
     }
 }
